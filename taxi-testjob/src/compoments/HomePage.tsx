@@ -20,7 +20,8 @@ function HomePage() {
     console.log(role + "/trips");
     if (role === "passenger" || role === "driver") {
       roleStorage.setData(role);
-      tripsStorage.setData(initialData);
+      const tripsInStorage = tripsStorage.getData();
+      if (!tripsInStorage) tripsStorage.setData(initialData);
       navigate(role + "/trips");
     }
   };

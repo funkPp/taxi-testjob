@@ -5,7 +5,15 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
-import { ITrip, newTrip, optionsRegion, tripsStorage } from "../shared/config";
+import { AddressSuggestions } from "react-dadata";
+import "react-dadata/dist/react-dadata.css";
+import {
+  ITrip,
+  newTrip,
+  optionsRegion,
+  optionsTariff,
+  tripsStorage,
+} from "../shared/config";
 import { Button, LinkButton } from "../uiKit";
 import clsx from "clsx";
 
@@ -14,13 +22,14 @@ export function AddEditTrip({ role }: { role: string }) {
   const [title, setTitle] = useState<string>("");
   const [trip, setTrip] = useState<ITrip | undefined>(newTrip);
 
+  const [value, setValue] = useState();
   const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
     region: Yup.string().required("Выберите регион"),
     from: Yup.string().required("Заполните поле"),
     to: Yup.string().required("Заполните поле"),
-    tariff: Yup.string().required("Заполните поле"),
+    tariff: Yup.string().required("Выберите тариф"),
   });
 
   type TMode = "onChange";
@@ -45,9 +54,10 @@ export function AddEditTrip({ role }: { role: string }) {
     if (id) {
       tripsStorage.updateItem(data, "id");
     } else {
-      tripsStorage.addItem(data);
+      const newData = { ...data, id: Date.now(), status: "Ожидание" };
+      tripsStorage.addItem(newData);
     }
-    navigate(`${role}/trips`);
+    navigate(`/${role}/trips`);
   }
 
   const getValue = (value: string) =>
@@ -55,11 +65,11 @@ export function AddEditTrip({ role }: { role: string }) {
 
   const styleInput = `
   bg-gray-50 border border-gray-300 text-sm rounded-sm 
-  hover:border-gray-600 focus:outline-gray-700 block w-full p-2`;
+  hover:border-gray-600 focus:outline-none block w-full p-2`;
 
   const styleSelect = `
   bg-gray-50 border border-gray-300 text-sm rounded-sm 
-  hover:border-gray-600 focus:outline-gray-700 block w-full`;
+  hover:border-gray-600 focus:outline-none block w-full`;
 
   const styleLabel = "block mb-2 text-sm font-medium";
 
@@ -72,38 +82,12 @@ export function AddEditTrip({ role }: { role: string }) {
         style={{ maxWidth: "400px", margin: "0 auto" }}
       >
         <div>
-          <div className="mb-2">
-            <label className={clsx(styleLabel)}>Имя</label>
-            <input
-              name="from"
-              type="text"
-              {...register("from")}
-              className={clsx(styleInput)}
-            />
-            <div className="mt-1 text-sm text-red-600">
-              {errors.from?.message}
-            </div>
-          </div>
-          <div className="mb-2">
-            <label className={clsx(styleLabel)}>Фамилия</label>
-            <input
-              name="to"
-              type="text"
-              {...register("to")}
-              className={clsx(styleInput)}
-            />
-            <div className="mt-1 text-sm text-red-600">
-              {errors.to?.message}
-            </div>
-          </div>
-        </div>
-        <div>
           <div>
-            <label className={clsx(styleLabel)}>Роль</label>
-            <div className="">
+            <label className={clsx(styleLabel)}>Регион</label>
+            <div className="mb-2">
               <Controller
                 control={control}
-                defaultValue={"user"}
+                // defaultValue={"ufa"}
                 name="region"
                 render={({ field: { onChange, value, ref } }) => (
                   <Select
@@ -117,18 +101,15 @@ export function AddEditTrip({ role }: { role: string }) {
                     styles={{
                       control: (provided) => ({
                         ...provided,
-                        borderColor: "none",
+                        border: "none",
                         boxShadow: "none",
-                        borderRadius: "5px",
                         background: "#FAFAFA",
                       }),
-                      menu: (provided) => ({
-                        ...provided,
-                        zIndex: 9999,
-                      }),
-                      singleValue: (provided) => ({
-                        ...provided,
-                        color: "#0097A7 ",
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused ? "#F3F4F6" : "white",
+                        color: "black",
+                        borderRadius: "1px",
                       }),
                     }}
                   />
@@ -139,8 +120,88 @@ export function AddEditTrip({ role }: { role: string }) {
               {errors.region?.message}
             </div>
           </div>
+          <div className="mb-2">
+            <label className={clsx(styleLabel)}>Откуда</label>
+            <div className="">
+              <Controller
+                control={control}
+                name="from"
+                render={({ field: { onChange, ref } }) => (
+                  <AddressSuggestions
+                    token="f725042183f85f224f499e2eaee6abd18193380f"
+                    ref={ref}
+                    inputProps={{ className: styleInput }}
+                    onChange={(newValue) => onChange(newValue.value)}
+                  />
+                )}
+              />
+            </div>
+            <div className="mt-1 text-sm text-red-600">
+              {errors.from?.message}
+            </div>
+          </div>
+
+          <div className="mb-2">
+            <label className={clsx(styleLabel)}>Куда</label>
+            <div className="">
+              <Controller
+                control={control}
+                name="to"
+                render={({ field: { onChange, ref } }) => (
+                  <AddressSuggestions
+                    token="f725042183f85f224f499e2eaee6abd18193380f"
+                    ref={ref}
+                    inputProps={{ className: styleInput }}
+                    onChange={(newValue) => onChange(newValue.value)}
+                  />
+                )}
+              />
+            </div>
+            <div className="mt-1 text-sm text-red-600">
+              {errors.from?.message}
+            </div>
+          </div>
+
+          <div>
+            <label className={clsx(styleLabel)}>Тариф</label>
+            <div className="">
+              <Controller
+                control={control}
+                name="tariff"
+                render={({ field: { onChange, value, ref } }) => (
+                  <Select
+                    placeholder="Выберите тариф"
+                    ref={ref}
+                    options={optionsTariff}
+                    value={getValue(value)}
+                    onChange={(newValue) => onChange(newValue.value)}
+                    classNamePrefix="react-select"
+                    className={styleSelect}
+                    styles={{
+                      control: (provided) => ({
+                        ...provided,
+                        border: "none",
+                        boxShadow: "none",
+                        background: "#FAFAFA",
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused ? "#eeeeee" : "white",
+                        color: "black",
+                        borderRadius: "1px",
+                      }),
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="mt-1 text-sm text-red-600">
+              {errors.tariff?.message}
+            </div>
+          </div>
         </div>
-        <div className="mt-3 flex flex-wrap justify-between">
+
+        <div className="mt-6 flex flex-wrap justify-between">
           <Button
             typeClass="main"
             type="submit"
@@ -155,7 +216,7 @@ export function AddEditTrip({ role }: { role: string }) {
             label="Сброс"
           />
 
-          <LinkButton typeClass="main" to={`/${role}/trips}`}>
+          <LinkButton typeClass="main" to={`/${role}/trips`}>
             Отмена
           </LinkButton>
         </div>

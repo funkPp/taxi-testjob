@@ -5,13 +5,14 @@ import { LinkButton, Table } from "../uiKit";
 export function Trips({ role }: { role: string }) {
   const roleLabel = roles.find((r) => r.value === role)?.label;
 
-  const head = ["id", "Регион", "Откуда", "Куда", "Тариф", "Статус", ""];
+  const head = ["Регион", "Откуда", "Куда", "Тариф", "Статус", ""];
 
   const [trips, setTrips] = useState<ITrip[]>([]);
 
   useEffect(() => {
     const storedItems = tripsStorage.getData() as ITrip[];
-    setTrips(storedItems);
+    const tripsView = storedItems.map(({ id: _, ...rest }) => rest);
+    setTrips(tripsView);
   }, []);
 
   const handlerDelete = (id: number) => {

@@ -9,7 +9,7 @@ export const roles = [
 export const roleStorage = new StorageService<string>("role");
 
 export interface ITrip { 
-  id: number;
+  id?: number;
   region: string;
   from: string;
   to: string;
@@ -30,9 +30,11 @@ export const newTrip: ITrip =
     status: "Ожидание"
   }
 
+  
+
 export const initialData: ITrip[] = [
   {
-    id: 1,
+    id: 1737701769401,
     region: "Уфа",
     from: "Уфа, ул. Кирова, д.46",
     to: "Уфа, ул. Карла Маркса, д. 56",
@@ -40,15 +42,15 @@ export const initialData: ITrip[] = [
     status: "Завершенный"
   },
   {
-    id: 2,
+    id: 1737701769402,
     region: "Уфа",
     from: "Уфа, ул. Карла Маркса, д 56",
     to: "Уфа, ул. Кирова, д. 46",
     tariff: "Бизнес",
-    status: "Ожидает"
+    status: "Ожидание"
   },
   {
-    id: 3,
+    id: 1737701769403,
     region: "Стерлитамак",
     from: "Уфа, ул. Кирова, д.46",
     to: "Стерлитамак, ул. Проспект Октября, д.91",
@@ -58,6 +60,14 @@ export const initialData: ITrip[] = [
 ];
 
   export const optionsRegion = [
-    { value: "ufa", label: "Уфа" },
-    { value: "Sterlitamak", label: "Стерлитамак" },
+    { value: "Уфа", label: "Уфа" },
+    { value: "Стерлитамак", label: "Стерлитамак" },
   ];
+
+    export const optionsTariff = [
+    { value: "Эконом", label: "Эконом" },
+    { value: "Комфорт", label: "Комфорт" },
+    { value: "Бизнес", label: "Бизнес" },
+    
+  ];
+
