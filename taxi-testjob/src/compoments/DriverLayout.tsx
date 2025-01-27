@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { Trips } from "./Trips";
 import { roleStorage } from "../shared/config";
 import { Nav } from "../uiKit";
+import { AddEditTrip } from "./AddEditTrip";
 
 export function DriverLayout() {
   const role = roleStorage.getData();
@@ -16,7 +17,7 @@ export function DriverLayout() {
       <Nav role={role} logout={handleClick}></Nav>
       <Routes>
         <Route index element={<Trips role="driver" />} />
-        {/* <Route path="edit/:id" element={<AddEditTrip />} /> */}
+        <Route path="edit/:id" element={<AddEditTrip role="driver" />} />
       </Routes>
     </div>
   );

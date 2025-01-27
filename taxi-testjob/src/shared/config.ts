@@ -8,17 +8,7 @@ export const roles = [
 
 export const roleStorage = new StorageService<string>("role");
 
-export interface ITrip { 
-  id?: number;
-  region: string;
-  from: string;
-  to: string;
-  tariff: string;
-  status: string;
-}
-
 export const tripsStorage = new StorageService<ITrip>("trips");
-
 
 export const newTrip: ITrip = 
   {
@@ -29,8 +19,6 @@ export const newTrip: ITrip =
     tariff: "Эконом",
     status: "Ожидание"
   }
-
-  
 
 export const initialData: ITrip[] = [
   {
@@ -70,4 +58,23 @@ export const initialData: ITrip[] = [
     { value: "Бизнес", label: "Бизнес" },
     
   ];
+  
+  export const headTable = [
+    { label: "ID", field: "id", sort: 0 },
+    { label: "Регион", field: "region", sort: 1 },
+    { label: "Откуда", field: "from", sort: 2 },
+    { label: "Куда", field: "to", sort: 3 },
+    { label: "Тариф", field: "tariff", sort: 4 },
+    { label: "Статус", field: "status", sort: 5 },
+  ];
 
+export interface ITrip { 
+  id?: number;
+  region: string;
+  from: string;
+  to: string;
+  tariff: string;
+  status?: string;
+}
+
+export const DADATA_TOKEN = "f725042183f85f224f499e2eaee6abd18193380f"

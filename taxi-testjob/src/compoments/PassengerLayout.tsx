@@ -21,6 +21,7 @@ export default function PassengerLayout() {
       <Routes>
         <Route index element={<Trips role="passenger" />} />
         <Route path="add" element={<AddEditTrip role="passenger" />} />
+        <Route path="edit/:id" element={<AddEditTrip role="passenger" />} />
       </Routes>
     </div>
   );

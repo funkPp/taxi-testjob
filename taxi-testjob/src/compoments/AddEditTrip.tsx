@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { data, useNavigate, useParams } from "react-router-dom";
 import { Card } from "../uiKit/Card";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Form } from "react-hook-form";
 import Select from "react-select";
 import { AddressSuggestions } from "react-dadata";
 import "react-dadata/dist/react-dadata.css";
 import {
+  DADATA_TOKEN,
   ITrip,
   newTrip,
   optionsRegion,
@@ -16,19 +17,23 @@ import {
 } from "../shared/config";
 import { Button, LinkButton } from "../uiKit";
 import clsx from "clsx";
+import { Trips } from "./Trips";
 
 export function AddEditTrip({ role }: { role: string }) {
   const { id } = useParams();
   const [title, setTitle] = useState<string>("");
   const [trip, setTrip] = useState<ITrip | undefined>(newTrip);
 
-  const [value, setValue] = useState();
   const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
     region: Yup.string().required("Выберите регион"),
-    from: Yup.string().required("Заполните поле"),
-    to: Yup.string().required("Заполните поле"),
+    from: Yup.string()
+      .required("Заполните поле")
+      .max(200, "Максимум 200 символов"),
+    to: Yup.string()
+      .required("Заполните поле")
+      .max(200, "Максимум 200 символов"),
     tariff: Yup.string().required("Выберите тариф"),
   });
 
@@ -37,9 +42,11 @@ export function AddEditTrip({ role }: { role: string }) {
     mode: "onChange" as TMode,
     resolver: yupResolver(validationSchema),
   };
-  const { register, handleSubmit, reset, formState, control } =
+  const { handleSubmit, reset, formState, control, setValue, watch } =
     useForm(formOptions);
   const { errors, isSubmitting } = formState;
+
+  const [region, from] = watch(["region", "from"]);
 
   useEffect(() => {
     if (id) {
@@ -49,6 +56,16 @@ export function AddEditTrip({ role }: { role: string }) {
       setTitle("Новая поездка");
     }
   }, [id]);
+
+  useEffect(() => {
+    console.log(trip, region, from);
+    reset(trip);
+  }, [trip, reset]);
+
+  // useEffect(() => {
+  //   //  setValue("from", region);
+  //   console.log(region, { from });
+  // }, [setValue, region, from]);
 
   async function onSubmit(data: ITrip) {
     if (id) {
@@ -60,34 +77,16 @@ export function AddEditTrip({ role }: { role: string }) {
     navigate(`/${role}/trips`);
   }
 
-  const getValue = (value: string) =>
-    value ? optionsRegion.find((o) => o.value === value) : "";
-
-  const styleInput = `
-  bg-gray-50 border border-gray-300 text-sm rounded-sm 
-  hover:border-gray-600 focus:outline-none block w-full p-2`;
-
-  const styleSelect = `
-  bg-gray-50 border border-gray-300 text-sm rounded-sm 
-  hover:border-gray-600 focus:outline-none block w-full`;
-
-  const styleLabel = "block mb-2 text-sm font-medium";
-
   return (
     <Card typeClass="main">
       <div className="p-2 font-medium text-center">{title}</div>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        style={{ maxWidth: "400px", margin: "0 auto" }}
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div>
             <label className={clsx(styleLabel)}>Регион</label>
             <div className="mb-2">
               <Controller
                 control={control}
-                // defaultValue={"ufa"}
                 name="region"
                 render={({ field: { onChange, value, ref } }) => (
                   <Select
@@ -95,7 +94,10 @@ export function AddEditTrip({ role }: { role: string }) {
                     ref={ref}
                     options={optionsRegion}
                     value={getValue(value)}
-                    onChange={(newValue) => onChange(newValue.value)}
+                    onChange={(newValue) => {
+                      onChange(newValue.value);
+                      // setValue("from", newValue.value);
+                    }}
                     classNamePrefix="react-select"
                     className={styleSelect}
                     styles={{
@@ -128,7 +130,7 @@ export function AddEditTrip({ role }: { role: string }) {
                 name="from"
                 render={({ field: { onChange, ref } }) => (
                   <AddressSuggestions
-                    token="f725042183f85f224f499e2eaee6abd18193380f"
+                    token={DADATA_TOKEN}
                     ref={ref}
                     inputProps={{ className: styleInput }}
                     onChange={(newValue) => onChange(newValue.value)}
@@ -149,7 +151,7 @@ export function AddEditTrip({ role }: { role: string }) {
                 name="to"
                 render={({ field: { onChange, ref } }) => (
                   <AddressSuggestions
-                    token="f725042183f85f224f499e2eaee6abd18193380f"
+                    token={DADATA_TOKEN}
                     ref={ref}
                     inputProps={{ className: styleInput }}
                     onChange={(newValue) => onChange(newValue.value)}
@@ -158,7 +160,7 @@ export function AddEditTrip({ role }: { role: string }) {
               />
             </div>
             <div className="mt-1 text-sm text-red-600">
-              {errors.from?.message}
+              {errors.to?.message}
             </div>
           </div>
 
@@ -224,3 +226,16 @@ export function AddEditTrip({ role }: { role: string }) {
     </Card>
   );
 }
+
+const getValue = (value: string) =>
+  value ? optionsRegion.find((o) => o.value === value) : "";
+
+const styleInput = `
+  bg-gray-50 border border-gray-300 text-sm rounded-sm 
+  hover:border-gray-600 focus:outline-none block w-full p-2`;
+
+const styleSelect = `
+  bg-gray-50 border border-gray-300 text-sm rounded-sm 
+  hover:border-gray-600 focus:outline-none block w-full`;
+
+const styleLabel = "block mb-2 text-sm font-medium";

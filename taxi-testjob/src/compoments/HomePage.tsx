@@ -12,10 +12,6 @@ function HomePage() {
   const [role, setRole] = useState<string>("init");
   const navigate = useNavigate();
 
-  const roleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRole(e.target.value);
-  };
-
   const handleClick = () => {
     console.log(role + "/trips");
     if (role === "passenger" || role === "driver") {
@@ -34,7 +30,7 @@ function HomePage() {
           name="select"
           className="m-2 h-10 w-230 bg-gray-100 bg-gray-50 border border-gray-300"
           defaultValue={"init"}
-          onChange={roleChange}
+          onChange={(e) => setRole(e.target.value)}
         >
           {roles.map((role, idx) => (
             <option key={idx} value={role.value}>
