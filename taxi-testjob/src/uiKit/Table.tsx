@@ -42,7 +42,7 @@ export function Table<T extends ITrip>({
         {item.label}
       </th>
     ));
-    headRender.push(<th></th>);
+    headRender.push(<th key="key"></th>);
   }
 
   let bodyRender = null;

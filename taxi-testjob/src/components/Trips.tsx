@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, MouseEvent } from "react";
 import { headTable, ITrip, roles, tripsStorage } from "../shared/config";
 import { LinkButton, Table } from "../uiKit";
-import Paginator from "./Paginator";
+import { Paginator } from "./Paginator";
 
 export function Trips({ role }: { role: string }) {
   const roleLabel = roles.find((r) => r.value === role)?.label;
@@ -10,7 +10,6 @@ export function Trips({ role }: { role: string }) {
 
   useEffect(() => {
     const storedItems = tripsStorage.getData() as ITrip[];
-    // const tripsView = storedItems.map(({ id: _, ...rest }) => rest);
     setTrips(storedItems);
   }, []);
 
@@ -32,7 +31,6 @@ export function Trips({ role }: { role: string }) {
   const pageCount = trips ? Math.ceil(trips.length / itemsPerPage) : 0;
 
   function handlePageClick(e: MouseEvent<HTMLButtonElement>): void {
-    console.log(e.target);
     if ((e.target as HTMLButtonElement).id === "prev") {
       if (currentPage > 0) setCurrentPage((currentPage) => currentPage - 1);
       return;
@@ -48,8 +46,6 @@ export function Trips({ role }: { role: string }) {
     const nextPage = Number((e.target as HTMLButtonElement).id);
     setCurrentPage(() => nextPage);
   }
-
-  console.log(currentItems);
 
   return (
     <div className="text-center mt-3">

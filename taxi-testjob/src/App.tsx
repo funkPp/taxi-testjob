@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import HomePage from "./compoments/HomePage";
-import PassengerLayout from "./compoments/PassengerLayout";
-import { DriverLayout } from "./compoments/DriverLayout";
+import { HomePage } from "./components/HomePage";
+import { PassengerLayout } from "./components/PassengerLayout";
+import { DriverLayout } from "./components/DriverLayout";
 
 function App() {
   return (

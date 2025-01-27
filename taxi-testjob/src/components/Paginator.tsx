@@ -1,5 +1,4 @@
 import { MouseEvent } from "react";
-// import styles from "./Paginator.module.css";
 import { clsx } from "clsx";
 
 interface IPaginatorProps {
@@ -14,7 +13,7 @@ const styles = {
   selected: "bg-gray-200",
 };
 
-export default function Paginator({
+export function Paginator({
   currentPage,
   handlePageClick,
   pageCount,

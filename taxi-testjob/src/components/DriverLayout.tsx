@@ -1,18 +1,24 @@
-import { Route, Routes } from "react-router-dom";
-import AddEditTrip from "./AddEditTrip";
-import ListTrips from "./ListTrips";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Trips } from "./Trips";
+import { roleStorage } from "../shared/config";
+import { Nav } from "../uiKit";
+import { AddEditTrip } from "./AddEditTrip";
 
-function DriverLayout() {
+export function DriverLayout() {
+  const role = roleStorage.getData();
+  const navigate = useNavigate();
+  const handleClick = () => {
+    localStorage.removeItem("role");
+    navigate("/");
+  };
+  if (role !== "driver") return <Navigate to="/" />;
   return (
-    <div className="px-4">
-      <div className="container">
-        <Routes>
-          <Route index element={<ListTrips role="driver" />} />
-          <Route path="edit/:id" element={<AddEditTrip />} />
-        </Routes>
-      </div>
+    <div className="container">
+      <Nav role={role} logout={handleClick}></Nav>
+      <Routes>
+        <Route index element={<Trips role="driver" />} />
+        <Route path="edit/:id" element={<AddEditTrip role="driver" />} />
+      </Routes>
     </div>
   );
 }
-
-export default DriverLayout;

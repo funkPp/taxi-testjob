@@ -1,19 +1,28 @@
-import { Route, Routes } from "react-router-dom";
-import AddEditTrip from "./AddEditTrip";
-import ListTrips from "./ListTrips";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Trips } from "./Trips";
+import { roleStorage } from "../shared/config";
+import { Nav } from "../uiKit";
+import { AddEditTrip } from "./AddEditTrip";
 
-function PassengerLayout() {
+export function PassengerLayout() {
+  const role = roleStorage.getData();
+
+  const navigate = useNavigate();
+  const handleClick = () => {
+    localStorage.removeItem("role");
+    navigate("/");
+  };
+
+  if (role !== "passenger") return <Navigate to="/" />;
+
   return (
-    <div className="px-4">
-      <div className="container">
-        <Routes>
-          <Route index element={<ListTrips role="passenger" />} />
-          <Route path="add" element={<AddEditTrip />} />
-          <Route path="edit/:id" element={<AddEditTrip />} />
-        </Routes>
-      </div>
+    <div className="container">
+      <Nav role={role} logout={handleClick}></Nav>
+      <Routes>
+        <Route index element={<Trips role="passenger" />} />
+        <Route path="add" element={<AddEditTrip role="passenger" />} />
+        <Route path="edit/:id" element={<AddEditTrip role="passenger" />} />
+      </Routes>
     </div>
   );
 }
-
-export default PassengerLayout;
