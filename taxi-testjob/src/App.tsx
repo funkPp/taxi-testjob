@@ -6,7 +6,7 @@ import { DriverLayout } from "./components/DriverLayout";
 function App() {
   return (
     <div className="bg-gray-200 h-screen">
-      <div className="sm:max-w-[100%] xl:max-w-[90%] mx-auto 2xl:max-w-[80%] bg-gray-100 h-screen text-sm">
+      <div className="sm:max-w-[100%] xl:max-w-[90%] mx-auto 2xl:max-w-[85%] bg-gray-100 h-screen text-sm">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="passenger/trips/*" element={<PassengerLayout />} />
