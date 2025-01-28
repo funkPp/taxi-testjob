@@ -281,7 +281,11 @@ export function AddEditTrip({ role }: { role: string }) {
           {!id && (
             <Button
               typeClass="main"
-              onClick={() => reset()}
+              onClick={() => {
+                reset();
+                setInputSuggetion("", refFrom);
+                setInputSuggetion("", refTo);
+              }}
               disabled={isSubmitting}
               label="Сброс"
             />

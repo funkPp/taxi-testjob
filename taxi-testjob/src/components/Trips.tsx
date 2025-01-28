@@ -5,7 +5,7 @@ import {
   ITrip,
   optionsRegion,
   optionsTariff,
-  roles,
+  optionsRoles,
   statusTrip,
   tripsStorage,
 } from "../shared/config";
@@ -31,7 +31,7 @@ export function Trips({ role }: { role: string }) {
     setTrips(storedItems);
   }, []);
 
-  const roleLabel = roles.find((r) => r.value === role)?.label;
+  const roleLabel = optionsRoles.find((r) => r.value === role)?.label;
 
   const filteredTrips = useMemo(() => {
     return trips.filter(
@@ -88,10 +88,10 @@ export function Trips({ role }: { role: string }) {
         {role === "driver" ? (
           <div className="flex flex-col items-centre px-2 my-1">
             <label>
-              Выберите регион :
+              Выберите регион:
               <select
                 name="select"
-                className=" bg-gray-100 border border-gray-300"
+                className=" bg-gray-100 border border-gray-300 m-1"
                 onChange={(e) => setRegion(getLabelRegion(e.target.value))}
               >
                 {optionsRegion.map((region, idx) => (
@@ -104,7 +104,7 @@ export function Trips({ role }: { role: string }) {
           </div>
         ) : null}
 
-        <div className="flex flex-col md:flex-row justify-end">
+        <div className="flex flex-col lg:flex-row justify-end">
           <div className="max-h-max grow">
             <div className="flex flex-row justify-between px-3 mt-1">
               <Paginator
@@ -138,16 +138,16 @@ export function Trips({ role }: { role: string }) {
           {role === "driver" ? (
             <div className="flex flex-col items-end px-2 mr-3 max-h-max border border-gray-300 mt-1">
               <label className="mt-2 self-end">
-                Фильтровать по тарифу :
+                Фильтровать по тарифу:
                 <input
-                  className=" m-2"
+                  className="m-2"
                   type="checkbox"
                   checked={isFiltred}
                   onChange={() => setIsFiltred(!isFiltred)}
                 />
               </label>
               <label className=" self-end">
-                Выберите тариф :
+                Выберите тариф:
                 <select
                   name="select"
                   disabled={!isFiltred}
@@ -163,7 +163,7 @@ export function Trips({ role }: { role: string }) {
               </label>
 
               <label className="mt-2 self-end">
-                Опубликованные :
+                Опубликованные:
                 <input
                   className=" m-2 "
                   type="checkbox"
@@ -171,10 +171,10 @@ export function Trips({ role }: { role: string }) {
                   onChange={() => setIsPublished(!isPublished)}
                 />
               </label>
-              <label className="self-end">
-                Завершенные :
+              <label className="mt-2 self-end">
+                Завершенные:
                 <input
-                  className=" m-2 mb-4 "
+                  className=" m-2 "
                   type="checkbox"
                   checked={isComplete}
                   onChange={() => setIsComplete(!isComplete)}
