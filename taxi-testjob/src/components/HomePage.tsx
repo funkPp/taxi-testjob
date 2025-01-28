@@ -27,7 +27,7 @@ export function HomePage() {
         Роль пользователя:
         <select
           name="select"
-          className="m-2 h-10 w-230 bg-gray-100 bg-gray-50 border border-gray-300"
+          className="m-2 h-8 bg-gray-50 border border-gray-300"
           defaultValue={"init"}
           onChange={(e) => setRole(e.target.value)}
         >

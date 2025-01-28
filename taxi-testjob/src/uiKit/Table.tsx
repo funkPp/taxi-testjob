@@ -56,12 +56,12 @@ export function Table<T extends ITrip>({
         ))}
         {(editById || handlerDeleteById) && (
           <td
-            className="px-2 py-1 flex flex-wrap flex-row gap-1 justify-center items-center "
+            className="px-2 py-1 flex flex-wrap flex-row gap-1 justify-center items-center  "
             key={" "}
           >
             {editById && (
               <LinkButton to={`${editById}${row.id}`} typeClass="main">
-                Изменить
+                Детали
               </LinkButton>
             )}
             {handlerDeleteById && (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "../uiKit/Card";
 import * as Yup from "yup";
@@ -10,10 +10,11 @@ import "react-dadata/dist/react-dadata.css";
 import {
   DADATA_TOKEN,
   ITrip,
-  newTrip,
+  optionsAction,
   optionsRegion,
   optionsTariff,
   tripsStorage,
+  statusTrip,
 } from "../shared/config";
 import { Button, LinkButton } from "../uiKit";
 import clsx from "clsx";
@@ -22,19 +23,21 @@ export function AddEditTrip({ role }: { role: string }) {
   const { id } = useParams();
   const [title, setTitle] = useState<string>("");
   const [trip, setTrip] = useState<ITrip | undefined>(undefined);
-
+  const refFrom = useRef<AddressSuggestions>(null);
+  const refTo = useRef<AddressSuggestions>(null);
   const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
     id: Yup.number(),
     region: Yup.string().required("Выберите регион"),
     from: Yup.string()
-      .required("Заполните поле")
+      .required("Выберите адрес")
       .max(200, "Максимум 200 символов"),
     to: Yup.string()
-      .required("Заполните поле")
+      .required("Выберите адрес")
       .max(200, "Максимум 200 символов"),
     tariff: Yup.string().required("Выберите тариф"),
+    status: Yup.string(),
   });
 
   type TMode = "onChange";
@@ -42,18 +45,13 @@ export function AddEditTrip({ role }: { role: string }) {
     mode: "onChange" as TMode,
     resolver: yupResolver(validationSchema),
   };
-  const { handleSubmit, reset, formState, control, setValue, watch } =
-    useForm(formOptions);
+  const { handleSubmit, reset, formState, control } = useForm(formOptions);
   const { errors, isSubmitting } = formState;
-
-  const [region, from] = watch(["region", "from"]);
 
   useEffect(() => {
     if (id) {
-      console.log("!!!!!!!!!");
       setTitle("Редактирование поездки");
       const tripById = tripsStorage.getItemById(Number(id), "id");
-      console.log({ tripById });
       setTrip(tripById);
     } else {
       setTitle("Новая поездка");
@@ -61,21 +59,16 @@ export function AddEditTrip({ role }: { role: string }) {
   }, [id]);
 
   useEffect(() => {
-    //  console.log(id, trip, region, from);
-    console.log({ trip });
     reset(trip);
+    setInputSuggetion(trip?.from as string, refFrom);
+    setInputSuggetion(trip?.to as string, refTo);
   }, [trip, reset]);
-
-  // useEffect(() => {
-  //   //  setValue("from", region);
-  //   console.log(region, { from });
-  // }, [setValue, region, from]);
 
   async function onSubmit(data: ITrip) {
     if (id) {
       tripsStorage.updateItem(data, "id");
     } else {
-      const newData = { ...data, id: Date.now(), status: "Ожидание" };
+      const newData = { ...data, id: Date.now(), status: "Опубликована" };
       tripsStorage.addItem(newData);
     }
     navigate(`/${role}/trips`);
@@ -94,12 +87,17 @@ export function AddEditTrip({ role }: { role: string }) {
                 name="region"
                 render={({ field: { onChange, value, ref } }) => (
                   <Select
+                    isDisabled={role !== "passenger"}
                     placeholder="Выберите регион"
                     ref={ref}
                     options={optionsRegion}
-                    value={getValue(value)}
+                    value={getValueRegion(value)}
                     onChange={(newValue) => {
-                      onChange(newValue.value);
+                      if (typeof newValue !== "string") {
+                        onChange(newValue?.value);
+                        setInputSuggetion(newValue?.value + " ", refFrom);
+                        setInputSuggetion(newValue?.value + " ", refTo);
+                      }
                     }}
                     classNamePrefix="react-select"
                     className={styleSelect}
@@ -131,12 +129,18 @@ export function AddEditTrip({ role }: { role: string }) {
               <Controller
                 control={control}
                 name="from"
-                render={({ field: { onChange, ref } }) => (
+                render={({ field: { onChange } }) => (
                   <AddressSuggestions
                     token={DADATA_TOKEN}
-                    ref={ref}
-                    inputProps={{ className: styleInput }}
-                    onChange={(newValue) => onChange(newValue.value)}
+                    ref={refFrom}
+                    inputProps={{
+                      className: styleInput,
+                      disabled: role !== "passenger",
+                    }}
+                    onChange={(newValue) => {
+                      if (typeof newValue !== "string")
+                        onChange(newValue?.value);
+                    }}
                   />
                 )}
               />
@@ -152,13 +156,16 @@ export function AddEditTrip({ role }: { role: string }) {
               <Controller
                 control={control}
                 name="to"
-                render={({ field: { onChange, ref } }) => (
+                render={({ field: { onChange } }) => (
                   <AddressSuggestions
                     token={DADATA_TOKEN}
-                    ref={ref}
-                    inputProps={{ className: styleInput }}
+                    ref={refTo}
+                    inputProps={{
+                      className: styleInput,
+                      disabled: role !== "passenger",
+                    }}
                     onChange={(newValue) => {
-                      onChange(newValue.value);
+                      if (newValue) onChange(newValue.value);
                     }}
                   />
                 )}
@@ -169,7 +176,7 @@ export function AddEditTrip({ role }: { role: string }) {
             </div>
           </div>
 
-          <div>
+          <div className="mb-2">
             <label className={clsx(styleLabel)}>Тариф</label>
             <div className="">
               <Controller
@@ -178,10 +185,14 @@ export function AddEditTrip({ role }: { role: string }) {
                 render={({ field: { onChange, value, ref } }) => (
                   <Select
                     placeholder="Выберите тариф"
+                    isDisabled={role !== "passenger"}
                     ref={ref}
                     options={optionsTariff}
-                    value={getValue(value)}
-                    onChange={(newValue) => onChange(newValue.value)}
+                    value={getValueTariff(value)}
+                    onChange={(newValue) => {
+                      if (typeof newValue !== "string")
+                        onChange(newValue?.value);
+                    }}
                     classNamePrefix="react-select"
                     className={styleSelect}
                     styles={{
@@ -206,6 +217,57 @@ export function AddEditTrip({ role }: { role: string }) {
               {errors.tariff?.message}
             </div>
           </div>
+
+          {role === "driver" ? (
+            <div className="mb-2">
+              <label className={clsx(styleLabel)}>Действия</label>
+              <div className="">
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field: { onChange, value, ref } }) => (
+                    <Select
+                      placeholder="Выберите действие"
+                      ref={ref}
+                      options={optionsAction}
+                      value={getValueAction(value as string)}
+                      onChange={(newValue) => {
+                        if (typeof newValue !== "string" && newValue) {
+                          const key = newValue.value;
+                          if (key in statusTrip) {
+                            onChange(
+                              statusTrip[key as keyof typeof statusTrip]
+                            );
+                          }
+                        }
+                      }}
+                      classNamePrefix="react-select"
+                      className={styleSelect}
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          border: "none",
+                          boxShadow: "none",
+                          background: "#FAFAFA",
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isFocused
+                            ? "#eeeeee"
+                            : "white",
+                          color: "black",
+                          borderRadius: "1px",
+                        }),
+                      }}
+                    />
+                  )}
+                />
+              </div>
+              <div className="mt-1 text-sm text-red-600">
+                {errors.status?.message}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-6 flex flex-wrap justify-between">
@@ -216,12 +278,14 @@ export function AddEditTrip({ role }: { role: string }) {
             label="Сохранить"
           />
 
-          <Button
-            typeClass="main"
-            onClick={() => reset()}
-            disabled={isSubmitting}
-            label="Сброс"
-          />
+          {!id && (
+            <Button
+              typeClass="main"
+              onClick={() => reset()}
+              disabled={isSubmitting}
+              label="Сброс"
+            />
+          )}
 
           <LinkButton typeClass="main" to={`/${role}/trips`}>
             Отмена
@@ -232,8 +296,21 @@ export function AddEditTrip({ role }: { role: string }) {
   );
 }
 
-const getValue = (value: string) =>
+const setInputSuggetion = (
+  value: string,
+  ref: RefObject<AddressSuggestions>
+) => {
+  ref.current?.setInputValue(value);
+};
+
+const getValueRegion = (value: string) =>
   value ? optionsRegion.find((o) => o.value === value) : "";
+
+const getValueTariff = (value: string) =>
+  value ? optionsTariff.find((o) => o.value === value) : "";
+
+const getValueAction = (value: string) =>
+  value ? optionsTariff.find((o) => o.value === value) : "";
 
 const styleInput = `
   bg-gray-50 border border-gray-300 text-sm rounded-sm 
