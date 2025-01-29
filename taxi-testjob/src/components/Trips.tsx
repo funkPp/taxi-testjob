@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState, MouseEvent } from "react";
-import { headTable, ITrip, roles, tripsStorage } from "../shared/config";
+import {
+  headTable,
+  ITEMS_PER_PAGE,
+  ITrip,
+  optionsRegion,
+  optionsTariff,
+  optionsRoles,
+  statusTrip,
+  tripsStorage,
+} from "../shared/config";
 import { LinkButton, Table } from "../uiKit";
 import { Paginator } from "./Paginator";
 
@@ -22,13 +31,17 @@ export function Trips({ role }: { role: string }) {
     setTrips(storedItems);
   }, []);
 
-  const handlerDelete = (id: number) => {
-    tripsStorage.removeItem(id, "id");
-    setTrips(tripsStorage.getData() as ITrip[]);
-  };
+  const roleLabel = optionsRoles.find((r) => r.value === role)?.label;
 
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [currentPage, setCurrentPage] = useState(0);
+  const filteredTrips = useMemo(() => {
+    return trips.filter(
+      (trip) =>
+        trip.region === region &&
+        (trip.tariff === tariff || !isFiltred) &&
+        (trip.status === statusTrip["complete"] || !isComplete) &&
+        (trip.status === statusTrip["published"] || !isPublished)
+    );
+  }, [trips, region, tariff, isFiltred, isComplete, isPublished]);
 
   const itemOffset = currentPage * itemsPerPage;
   const endOffset = itemOffset + itemsPerPage;
@@ -65,38 +78,111 @@ export function Trips({ role }: { role: string }) {
     <div className="text-center mt-3">
       <div className="font-medium">Поездки, ваша роль: {roleLabel} </div>
 
-      <div className="flex flex-col justify-start">
-        <LinkButton to="/passenger/trips/add" typeClass="flexRight">
-          Добавить поездку
-        </LinkButton>
-        <div className="flex flex-row justify-between px-3 my-1">
-          <Paginator
-            currentPage={currentPage}
-            handlePageClick={handlePageClick}
-            pageCount={pageCount}
-          />
-          <label className="">
-            Кол-во на странице:
-            <input
-              className="h-8 w-12 pl-2 ml-1 border border-gray-300"
-              type="number"
-              value={itemsPerPage}
-              onChange={(e) => {
-                if (+e.target.value > 0) {
-                  setItemsPerPage(+e.target.value.replace(/[^0-9+]/g, ""));
-                  setCurrentPage(0);
-                }
-              }}
+      <div className="flex flex-col justify-start ">
+        {role === "passenger" ? (
+          <LinkButton to="/passenger/trips/add" typeClass="flexRight">
+            Добавить поездку
+          </LinkButton>
+        ) : null}
+
+        {role === "driver" ? (
+          <div className="flex flex-col items-centre px-2 my-1">
+            <label>
+              Выберите регион :
+              <select
+                name="select"
+                className=" bg-gray-100 border border-gray-300"
+                onChange={(e) => setRegion(getLabelRegion(e.target.value))}
+              >
+                {optionsRegion.map((region, idx) => (
+                  <option key={idx} value={region.value}>
+                    {region.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
+
+        <div className="flex flex-col md:flex-row justify-end">
+          <div className="max-h-max grow">
+            <div className="flex flex-row justify-between px-3 mt-1">
+              <Paginator
+                currentPage={currentPage}
+                handlePageClick={handlePageClick}
+                pageCount={pageCount}
+              />
+              <label className="">
+                Кол-во на странице:
+                <input
+                  className="h-8 w-12 pl-2 ml-1 border border-gray-300"
+                  type="number"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    if (+e.target.value > 0) {
+                      setItemsPerPage(+e.target.value.replace(/[^0-9+]/g, ""));
+                      setCurrentPage(0);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <Table
+              head={headTable}
+              body={currentItems}
+              typeClass="main"
+              handlerDeleteById={handlerDelete}
+              editById={`/${role}/trips/edit/`}
             />
-          </label>
+          </div>
+          {role === "driver" ? (
+            <div className="flex flex-col items-end px-2 mr-3 max-h-max border border-gray-300 mt-1">
+              <label className="mt-2 self-end">
+                Фильтровать по тарифу :
+                <input
+                  className=" m-2"
+                  type="checkbox"
+                  checked={isFiltred}
+                  onChange={() => setIsFiltred(!isFiltred)}
+                />
+              </label>
+              <label className=" self-end">
+                Выберите тариф :
+                <select
+                  name="select"
+                  disabled={!isFiltred}
+                  className="m-1 h-8  bg-gray-100 border border-gray-300"
+                  onChange={(e) => setTariff(getLabelTariff(e.target.value))}
+                >
+                  {optionsTariff.map((tarif, idx) => (
+                    <option key={idx} value={tarif.value}>
+                      {tarif.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="mt-2 self-end">
+                Опубликованные :
+                <input
+                  className=" m-2 "
+                  type="checkbox"
+                  checked={isPublished}
+                  onChange={() => setIsPublished(!isPublished)}
+                />
+              </label>
+              <label className="self-end">
+                Завершенные :
+                <input
+                  className=" m-2 mb-4 "
+                  type="checkbox"
+                  checked={isComplete}
+                  onChange={() => setIsComplete(!isComplete)}
+                />
+              </label>
+            </div>
+          ) : null}
         </div>
-        <Table
-          head={headTable}
-          body={currentItems}
-          typeClass="main"
-          handlerDeleteById={handlerDelete}
-          editById={`/${role}/trips/edit/`}
-        />
       </div>
     </div>
   );

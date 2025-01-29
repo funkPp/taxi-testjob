@@ -278,12 +278,18 @@ export function AddEditTrip({ role }: { role: string }) {
             label="Сохранить"
           />
 
-          <Button
-            typeClass="main"
-            onClick={() => reset()}
-            disabled={isSubmitting}
-            label="Сброс"
-          />
+          {!id && (
+            <Button
+              typeClass="main"
+              onClick={() => {
+                reset();
+                setInputSuggetion("", refFrom);
+                setInputSuggetion("", refTo);
+              }}
+              disabled={isSubmitting}
+              label="Сброс"
+            />
+          )}
 
           <LinkButton typeClass="main" to={`/${role}/trips`}>
             Отмена

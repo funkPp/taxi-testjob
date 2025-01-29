@@ -14,7 +14,6 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    console.log(role);
     roleStorage.setData(role.value);
     const tripsInStorage = tripsStorage.getData();
     if (!tripsInStorage) tripsStorage.setData(initialData);
